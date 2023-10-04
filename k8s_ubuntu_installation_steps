@@ -201,7 +201,7 @@ kubectl get nodes
 kubectl create deployment nginx-app --image=nginx --replicas=2
 
 # Expose the deployment as NodePort
-kubectl expose deployment nginx-app --type=NodePort --port=80 service/nginx-app exposed
+kubectl expose deployment nginx-app --type=NodePort --port=80
 
 # Run following commands to view service status
 kubectl get svc nginx-app
