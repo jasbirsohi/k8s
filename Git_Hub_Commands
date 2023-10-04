@@ -1,0 +1,11 @@
+
+git add .
+git status
+git commit -m "uploading file k8s_ubuntu_installation_steps 10042023"
+git status
+git remote add origin https://github.com/jasbirsohi/k8s.git
+git push -u origin main
+
+git remote set-url origin https://type_git_hub_token@github.com/USERNAME/REPO_NAME
+git push -u origin main
+git status
