@@ -1,5 +1,14 @@
 # This Installation file has the steps to install K8S Cluster on UBUNTU 22.04 OS
 
+# Must fulfill below prerequesties
+# Controller Node must have minimum of 02 CPU and 4Gb of Memory
+# Worker Node must have minimum of 01 CPU with 2 Gb of Memory
+# Unique hostname, MAC address, and product_uuid for every node.
+# https://kubernetes.io/docs/reference/networking/ports-and-protocols/ - Review the ports required to open for k8s cluster
+
+
+
+
 # Common commands need to know for all cluster nodes
 
 # To Gain the root access on Ubuntu 22.x
@@ -90,9 +99,34 @@ sudo sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/c
 sudo systemctl restart containerd
 sudo systemctl enable containerd
 
+# Google-hosted package repository (deprecated)
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl
+curl -fsSL https://dl.k8s.io/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d kubernetes.list
+
+# Note:
+# Kubernetes has two different package repositories starting from August 2023. The Google-hosted repository is deprecated and it's being replaced with the Kubernetes (community-owned) package repositories. The Kubernetes project strongly recommends using the Kubernetes community-owned package repositories, because the project plans to stop publishing packages to the Google-hosted repository in the future.
+
+# There are some important considerations for the Kubernetes package repositories:
+
+# The Kubernetes package repositories contain packages beginning with those Kubernetes versions that were still under support when the community took over the package builds. This means that anything before v1.24.0 will only be available in the Google-hosted repository.
+# There's a dedicated package repository for each Kubernetes minor version. When upgrading to a different minor release, you must bear in mind that the package repository details also change.
+
+# Kubernetes package repositories
+# These instructions are for Kubernetes 1.28
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+
+
 # Add Apt Repository for Kubernetes
+sudo apt-get install -y apt-transport-https ca-certificates curl
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/kubernetes-xenial.gpg
 sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+
 # Install Kubectl, Kubeadm and Kubelet
 sudo apt update
 apt-cache madison kubeadm #optional command to choose desired version
