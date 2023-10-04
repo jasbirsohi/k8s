@@ -1,0 +1,136 @@
+K8S_UBUNTU_OS
+
+
+# To Gain root access on Ubuntu 22.x
+sudo -i
+
+# To update and upgarde Ubuntu 22.x Packages
+apt update
+apt upgrade
+
+# To Check DNS Status on Ubuntu 22.x
+resolvectl status
+# To edit DNS Servers on Ubuntu 22.x
+vi /etc/netplan/00-installer-config.yaml
+#To Apply the DNS Changes
+netplan apply
+
+
+
+https://www.linuxtechi.com/install-kubernetes-on-ubuntu-22-04/ (verified Method)
+https://www.youtube.com/watch?v=iwlNCePWiw4 - This youtube is same which is based on above verified method but still need to get tested
+and most importantly,need to test calico configuration method.
+https://nvtienanh.info/blog/cai-dat-kubernetes-cluster-tren-ubuntu-server-22-04
+
+*****************************************************************
+
+sudo hostnamectl set-hostname "controller1.13infotech.com"
+sudo hostnamectl set-hostname "node1.13infotech.com"
+
+exec bash
+
+sudo vi /etc/hosts
+
+192.168.100.100 controller1     controller1.13infotech.com
+192.168.100.99  node1           node1.13infotech.com
+192.168.100.98  node2           node2.13infotech.com
+
+
+sudo swapoff -a
+sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+
+sudo vim /etc/fstab - Must # Manually to set as swap off permanent.
+#/swap.img
+
+sudo mount -a
+free -h
+
+
+sudo tee /etc/modules-load.d/containerd.conf <<EOF
+overlay
+br_netfilter
+EOF
+
+sudo modprobe overlay
+sudo modprobe br_netfilter
+
+
+sudo tee /etc/sysctl.d/kubernetes.conf <<EOF
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+net.ipv4.ip_forward = 1
+EOF
+
+sudo sysctl --system
+
+
+sudo apt install -y curl gnupg2 software-properties-common apt-transport-https ca-certificates
+
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+
+sudo apt update
+sudo apt install -y containerd.io
+
+containerd config default | sudo tee /etc/containerd/config.toml >/dev/null 2>&1
+sudo sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml
+
+
+sudo systemctl restart containerd
+sudo systemctl enable containerd
+
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/kubernetes-xenial.gpg
+sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+
+sudo apt update
+apt-cache madison kubeadm #optional command to choose desired version
+sudo apt install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+
+
+sudo kubeadm init --control-plane-endpoint=controller1.13infotech.com
+
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+chmod 600 config (if config file is being copied to any other machines)
+
+kubeadm join controller1.13infotech.com:6443 --token ir8qv3.m18ok6a0skorkk71 \
+	--discovery-token-ca-cert-hash sha256:c045fb2a1d34005258bf4d130374613f8f6100d058e32a337eb3e1ec87693c62 \
+	--control-plane
+    
+
+kubeadm join controller1.13infotech.com:6443 --token ir8qv3.m18ok6a0skorkk71 \
+	--discovery-token-ca-cert-hash sha256:c045fb2a1d34005258bf4d130374613f8f6100d058e32a337eb3e1ec87693c62
+
+
+kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/calico.yaml
+
+kubectl get pods -n kube-system
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+# Important Commands
+
+kubectl describe svc kubernetes
+kubectl run httpd --image=httpd:alpine --port=80 --expose
+kubectl get pods --selector env=dev --no-headers | wc -l
+
+
+
+
+
+
