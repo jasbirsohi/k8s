@@ -15,14 +15,14 @@
 sudo -i
 
 # To update and upgarde Ubuntu 22.x Packages before k8s cluster installation
-apt update
-apt upgrade
+sudo apt update
+sudo apt upgrade
 # To Check the DNS Status on Ubuntu 22.x
 resolvectl status
 # To edit the DNS Servers on Ubuntu 22.x
-vi /etc/netplan/00-installer-config.yaml
+sudo vi /etc/netplan/00-installer-config.yaml
 #To Apply the DNS Changes
-netplan apply
+sudo netplan apply
 
 # Reference Articles used to compose these steps and tested on 10/04/2023
 # https://www.linuxtechi.com/install-kubernetes-on-ubuntu-22-04/ (verified Method)
