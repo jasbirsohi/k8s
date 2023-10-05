@@ -1,6 +1,29 @@
 
 # Imperative method to create different applications
 
+Setting the namespace preference:
+------------------------------------
+
+Note: 
+-----
+1. You can permanently save the namespace for all subsequent kubectl commands in that context.
+2. --minify=false: Remove all information not used by current-context from the output
+
+Syntax: 
+kubectl config set-context --current --namespace=<insert-namespace-name-here>
+# Provided alias k=kubectl is set else type full syntax as kubectl
+k config set-context --current --namespace=dev
+k config view --minify | grep namespace:
+k get pods
+
+k config set-context --current --namespace=test
+k config view --minify | grep namespace:
+k run redis --image=redis 
+k get pods
+
+k config set-context --current --namespace=default
+k config view --minify | grep namespace:
+k run httpd --image=httpd
 
 # Imperative method to provision httpd apache application
 # Provided alias k=kubectl is set
