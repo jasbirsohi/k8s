@@ -1,11 +1,18 @@
+# These are the commands used to manage GitHub Repositories
 
-git add .
-git status
-git commit -m "uploading file k8s_ubuntu_installation_steps 10042023"
-git status
+# To add remote Github Origin
 git remote add origin https://github.com/jasbirsohi/k8s.git
-git push -u origin main
-
 git remote set-url origin https://type_git_hub_token@github.com/USERNAME/REPO_NAME
+
+# To add the untracked files
+git add .
+# To check status of Git Activity Status - Always use this command to check the status after every change.
+git status
+# To add tag whole commiting the changes
+git commit -m "uploading file k8s_ubuntu_installation_steps 10042023"
+# To check status of Git Activity Status after tagging the commit
+git status
+# To push the commit to remote Github repository
 git push -u origin main
+# To check status of Git Activity Status after push to remote origin
 git status
