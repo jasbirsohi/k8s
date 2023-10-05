@@ -53,8 +53,8 @@ kubectl get ns [NAMESPACE-NAME]
 kubectl get ns [NAMESPACE-NAME] -o wide
 kubectl get ns [NAMESPACE-NAME] -o yaml
 kubectl get pods –-namespace=[NAMESPACE-NAME]
-
 kubectl describe ns [NAMESPACE-NAME]
+
 
 
 ***************************************************************************************************
@@ -64,11 +64,23 @@ kubectl describe ns [NAMESPACE-NAME]
 
 kubectl run nginx --image=nginx --namespace=dev
 
+# example - creating apache webserver pod
+k run httpd1 --image=httpd -n=dev
+k create deploy httpd1 --image=httpd --replicas=3 -n=dev
+k get po -n=dev
+# To check the Pods Status on cluster wide ndes
+k get po -n=dev -o wide
+# Exposing Service through NodePort 80 without selectors 
+k expose deploy httpd1 --type=NodePort --port=80 -n=dev
+ 
 Validate:
 ----------
 kubectl get pods
 kubectl get pods -n dev
 
+# Or
+k get po
+k get po -n dev
 
 
 ***************************************************************************************************
