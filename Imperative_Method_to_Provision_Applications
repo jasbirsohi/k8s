@@ -1,0 +1,87 @@
+
+# Imperative method to create different applications
+
+
+# Imperative method to provision httpd apache application
+# Provided alias k=kubectl is set
+
+# Create namespace dev
+k create ns dev
+# Check if any exisiting pods are present in newly created namespace which is dev
+k get po -n=dev
+# To Check the pods current status in all namespaces
+kubectl get pods -A
+# If we need to create just 01 pod only 
+k run httpd1 --image=httpd -n=dev
+k get po -n=dev
+
+# If we need to create deployment of httpd (Apache Server)
+k create deploy httpd1 --image=httpd --replicas=3 -n=dev
+k get po -n=dev
+# To check the Pods Status on cluster wide ndes
+k get po -n=dev -o wide
+# to see yaml output you cam try below command
+k get po -n=dev -o yaml
+# Exposing Service through NodePort 80 without selectors 
+k expose deploy httpd1 --type=NodePort --port=80 -n=dev
+
+
+# Deleting Imperative Commands
+
+# First delete the svc 
+k delete svc httpd1 -n=dev
+# Second delete pods deployment
+k delete deploy httpd1 -n=dev
+# Delete if you have any standalone pod made without deployment method
+k get po -A
+k get po -n=dev
+k delete po httpd
+
+# If you willing to delete dev namespace in the end
+k get ns
+k delete ns dev
+k get ns
+k get po
+
+###########################################################################
+
+# Imperative method to provision nginx application
+# Provided namespace is still dev
+
+# Check if any exisiting pods are present in newly created namespace which is dev
+k get po -n=dev
+# To Check the pods current status in all namespaces
+kubectl get pods -A
+# If we need to create just 01 pod only 
+k run nginx1 --image=nginx -n=dev
+k get po -n=dev
+
+# If we need to create deployment of httpd (Apache Server)
+k create deploy nginx1 --image=nginx --replicas=3 -n=dev
+k get po -n=dev
+# To check the Pods Status on cluster wide ndes
+k get po -n=dev -o wide
+# to see yaml output you cam try below command
+k get po -n=dev -o yaml
+# Exposing Service through NodePort 80 without selectors 
+k expose deploy nginx1 --type=NodePort --port=80 -n=dev
+
+# Deleting Imperative Commands
+
+# First delete the svc 
+k delete svc nginx1 -n=dev
+# Second delete pods deployment
+k delete deploy nginx1 -n=dev
+# Delete if you have any standalone pod made without deployment method
+k get po -A
+k get po -n=dev
+k delete po nginx
+
+# If you willing to delete dev namespace in the end
+k get ns
+k delete ns dev
+k get ns
+k get po
+###############################################################################
+
+
