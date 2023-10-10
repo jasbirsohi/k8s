@@ -1,4 +1,5 @@
 # version 0.1 - 10102023
+
 # This Installation file has the steps to install K8S Cluster 1.28 on UBUNTU OS 22.04
 
 # Must fulfill below prerequesties
@@ -7,8 +8,25 @@
 # Unique hostname, MAC address, and product_uuid for every node.
 # https://kubernetes.io/docs/reference/networking/ports-and-protocols/ - Review the ports required to open for k8s cluster
 
+# VM OS used = Ubuntu 22.04 for all nodes
+# K8S Cluster Version = 1.28.2 (available in Oct 2023)
+
+# VM Nodes or Server IP range used = 192.168.100.0/24 (256 static ips - 254 useable)
+# K8S Internal IP Range taken = 10.244.0.0/16
+
+# Total controllers considered in this project
+# Minimun CPU/Memory required are 2 CPU / 2 Gib
+# I have took 2 CPU / 4 Gib for all contol plane nodes
+
+# controller1.13infotech.com - controllerplane - 01
 
 
+# Total Worker Nodes considered in this project
+# Minimun CPU/Memory required are 1 CPU / 1 Gib
+# I have took 2 CPU / 4 Gib for all woker nodes
+# wn01.13infotech.com - Worker Node 01
+# wn02.13infotech.com - Worker Node 02
+# wn03.13infotech.com - Worker Node 03
 
 # Common commands need to know for all cluster nodes
 
@@ -16,39 +34,38 @@
 sudo -i
 
 # To update and upgarde Ubuntu 22.x Packages before k8s cluster installation
-sudo apt update
-sudo apt upgrade
+sudo apt update && sudo apt upgrade -y
+
 # To Check the DNS Status on Ubuntu 22.x
 resolvectl status
+
 # To edit the DNS Servers on Ubuntu 22.x
 sudo vi /etc/netplan/00-installer-config.yaml
+
 #To Apply the DNS Changes
 sudo netplan apply
 
-# Reference Articles used to compose these steps and tested on 10/04/2023
-# https://www.linuxtechi.com/install-kubernetes-on-ubuntu-22-04/ (verified Method)
-# https://www.youtube.com/watch?v=iwlNCePWiw4 - This youtube is same which is based on above verified method but still need to get tested
-# and most importantly,need to test calico configuration method.
-# https://nvtienanh.info/blog/cai-dat-kubernetes-cluster-tren-ubuntu-server-22-04
+# update all nodes to check if the OS is already updated and can download system updates from Internet
+sudo apt update && sudo apt upgrade -y
 
-# Installation of k8s cluster start from here
-
-# First set the hostname of all nodes
-# I am installing 01 controller and 02 nodes for k8s cluster on ubuntu 22.04
-# I own the domain 13infotech.com thats why I have used here, you can use any domain
-
+# First set the hostname of all the nodes
+# I own the domain 13infotech.com thats why I have used here, you can use any domain that you own
 sudo hostnamectl set-hostname "controller1.13infotech.com"
-sudo hostnamectl set-hostname "node1.13infotech.com"
-sudo hostnamectl set-hostname "node2.13infotech.com"
+sudo hostnamectl set-hostname "wn01.13infotech.com"
+sudo hostnamectl set-hostname "wn02.13infotech.com"
+sudo hostnamectl set-hostname "wn03.13infotech.com"
+
+# Optional Step
 exec bash
 
-# Please add dns enteries in host file of all nodes
+# Sample for /etc/hosts on all nodes
+# You must copy all these enteries on all nodes - control planes,HA Proxy Node,Woker Nodes,Any Laptop or Jump Server using to access all these nodes.
+sudo vi /etc/host
 
-sudo vi /etc/hosts
-
-192.168.100.100 controller1     controller1.13infotech.com
-192.168.100.99  node1           node1.13infotech.com
-192.168.100.98  node2           node2.13infotech.com
+192.168.100.100 controller1 controller1.13infotech.com
+192.168.100.98 wn01 wn01.13infotech.com
+192.168.100.97 wn02 wn02.13infotech.com
+192.168.100.96 wn02 wn02.13infotech.com
 
 # Mandatory steps to turn off the swap on all nodes
 sudo swapoff -a
@@ -56,14 +73,17 @@ sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
 
 # Mandatory step to turn off the swap manually else upon restart of any node, swap will be active again
 sudo vim /etc/fstab
-#/swap.img   #add # infront of /swap.img to make it permanently disabled
+add #/swap.img   #add # infront of /swap.img to make it permanently disabled
 # Restart the node after making this. 
 
-# After restart check again to see if swap is disabled by executing these commands
+# once done all steps are completed on all nodes, please reboot all nodes
+sudo reboot
 
+# After restart check again to see if swap is disabled by executing these commands
 sudo mount -a
 free -h
 
+# Mandatory steps to turn off the swap on all nodes excluding controller3.13infotech.com
 
 # Load the following kernel modules on all the nodes
 sudo tee /etc/modules-load.d/containerd.conf <<EOF
@@ -92,41 +112,24 @@ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubun
 # Now, run following apt command to install containerd
 sudo apt update
 sudo apt install -y containerd.io
-
 # Configure containerd so that it starts using systemd as cgroup.
 containerd config default | sudo tee /etc/containerd/config.toml >/dev/null 2>&1
 sudo sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml
 # Restart and enable containerd service
 sudo systemctl restart containerd
 sudo systemctl enable containerd
-
-# Google-hosted package repository (deprecated)
-sudo apt-get update
+# Add Apt Repository for Kubernetes - Google deprecating repositories (Choose either Google or Kubernetes New long term repository)
 sudo apt-get install -y apt-transport-https ca-certificates curl
-curl -fsSL https://dl.k8s.io/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
-echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d kubernetes.list
-
-# Note:
-# Kubernetes has two different package repositories starting from August 2023. The Google-hosted repository is deprecated and it's being replaced with the Kubernetes (community-owned) package repositories. The Kubernetes project strongly recommends using the Kubernetes community-owned package repositories, because the project plans to stop publishing packages to the Google-hosted repository in the future.
-
-# There are some important considerations for the Kubernetes package repositories:
-
-# The Kubernetes package repositories contain packages beginning with those Kubernetes versions that were still under support when the community took over the package builds. This means that anything before v1.24.0 will only be available in the Google-hosted repository.
-# There's a dedicated package repository for each Kubernetes minor version. When upgrading to a different minor release, you must bear in mind that the package repository details also change.
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/kubernetes-xenial.gpg
+sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+# OR
 
 # Kubernetes package repositories
-# These instructions are for Kubernetes 1.28
+# These instructions are for Kubernetes 1.28.x
 sudo apt-get update
 sudo apt-get install -y apt-transport-https ca-certificates curl
 curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
-
-
-
-# Add Apt Repository for Kubernetes
-sudo apt-get install -y apt-transport-https ca-certificates curl
-curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/kubernetes-xenial.gpg
-sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
 
 # Install Kubectl, Kubeadm and Kubelet
 sudo apt update
@@ -134,22 +137,15 @@ apt-cache madison kubeadm #optional command to choose desired version
 sudo apt install -y kubelet kubeadm kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
 
-# nvtienanh.info - yet to validate via hands on
-curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
-sudo apt update
-sudo apt install -y kubelet kubeadm kubectl
-sudo apt-mark hold kubelet kubeadm kubectl
-
-
 # Initialize Kubernetes Cluster with Kubeadm. Run the following Kubeadm command on the master node only.
 sudo kubeadm init --control-plane-endpoint=controller1.13infotech.com
 
-# nvtienanh.info - yet to validate via hands on
+# OR
+
+# Alternative Method if you want to publish the IP range for POD Network while intitalizing the Control Plane
 sudo kubeadm init \
   --pod-network-cidr=10.10.0.0/16 \
   --control-plane-endpoint=controller1.13infotech.com
-
 
 # to start interacting with cluster, run following commands on the master node
 mkdir -p $HOME/.kube
@@ -179,34 +175,24 @@ kubectl get nodes
 
 # As we can see nodes status is ‘NotReady’, so to make it active.
 # We must install CNI (Container Network Interface) or network add-on plugins like Calico, Flannel and Weave-net
-
-# Run following kubectl command to install Calico network plugin from the master node,
-kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/calico.yaml
-
-# nvtienanh.info - yet to validate via hands on - Second method, so that you can edit the POD Network
+# To edit and add the POD Network, download the manifest calico yaml file via option -O
 curl https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/calico.yaml -O
 # edit calico.yaml that are now downloaded on your controller and search CALICO_IP_V4POOL_CIDR
 # unhash the values and replace the same CIDR that you have used while initializing the controller
 - name: CALICO_IPV4POOL_CIDR
-  value: '10.10.0.0/16'
+  value: '10.244.0.0/16'
 # save the file and then enter the following command
 kubectl apply -f calico.yaml
-
 # Verify the status of pods in kube-system namespace
 kubectl get pods -n kube-system
-
 # Perfect, check the nodes status as well
 kubectl get nodes
-
 # Test Your Kubernetes Cluster Installation
 kubectl create deployment nginx-app --image=nginx --replicas=2
-
 # Expose the deployment as NodePort
 kubectl expose deployment nginx-app --type=NodePort --port=80
-
 # Run following commands to view service status
 kubectl get svc nginx-app
 kubectl describe svc nginx-app
-
 # Use following curl command to access nginx based application
 curl http://192.168.1.174:31246 # example only, please replace the static IP of your actual controller or node server
