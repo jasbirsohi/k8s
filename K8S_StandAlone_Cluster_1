@@ -195,4 +195,4 @@ kubectl expose deployment nginx-app --type=NodePort --port=80
 kubectl get svc nginx-app
 kubectl describe svc nginx-app
 # Use following curl command to access nginx based application
-curl http://192.168.1.174:31246 # example only, please replace the static IP of your actual controller or node server
+curl http://192.168.100.100:31246 # example only, please replace the static IP of your actual controller or node server
