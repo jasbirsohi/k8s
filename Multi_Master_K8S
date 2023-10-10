@@ -1,5 +1,5 @@
 
-Version 0.1-10102023
+Version 0.2 -10102023
 
 Multi-Master K8S Cluster Configuration
 
@@ -33,8 +33,7 @@ Multi-Master K8S Cluster Configuration
 sudo -i
 
 # To update and upgarde Ubuntu 22.x Packages before k8s cluster installation
-sudo apt update
-sudo apt upgrade
+sudo apt update && sudo apt upgrade -y
 
 # To Check the DNS Status on Ubuntu 22.x
 resolvectl status
@@ -75,6 +74,42 @@ sudo vi /etc/host
 192.168.100.98 wn01 wn01.13infotech.com
 192.168.100.97 wn02 wn02.13infotech.com
 192.168.100.96 wn02 wn02.13infotech.com
+
+# For our cluster, we will use HAPROXY as the primary loadbalancer
+# Install haproxy
+sudo apt-get install haproxy -y
+# Edit haproxy configuration
+vi /etc/haproxy/haproxy.cfg
+# Add the below lines to create a frontend configuration for the loadbalancer
+frontend fe-apiserver
+   bind 0.0.0.0:6443
+   mode tcp
+   option tcplog
+   default_backend be-apiserver
+# Add the below lines to create a backend configuration for master1,master2 and master3 nodes at port 6443
+# Note : 6443 is the default port of kube-apiserver
+backend be-apiserver
+   mode tcp
+   option tcplog
+   option tcp-check
+   balance roundrobin
+   default-server inter 10s downinter 5s rise 2 fall 2 slowstart 60s maxconn 250 maxqueue 256 weight 100
+
+       server master1 controller0.13infotech.com:6443 check
+       server master2 controller1.13infotech.com:6443 check
+       server master3 controller2.13infotech.com:6443 check
+# Restart and verify the haproxy
+systemctl restart haproxy
+systemctl status haproxy
+sytemctl enable haproxy
+
+# Ensure haproxy is in running status
+# Run nc command as below
+nc -v localhost 6443
+
+# Output will be like this
+# Connection to localhost 6443 port [tcp/*] succeeded!
+
 
 
 # Mandatory steps to turn off the swap on all nodes excluding controller3.13infotech.com
