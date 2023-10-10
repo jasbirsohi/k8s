@@ -27,10 +27,22 @@ Multi-Master K8S Cluster Configuration
 # controller3.13infotech.com - Load Balancer Node hosting haproxy - 01
 # This Load Balance Node will route all control planes upon intitalize.
 
+# Firewall Rules (Ingress)
+# Master Node: 2379,6443,10250,10251,10252 
+# Worker Node: 10250,30000-32767
+
 # Common commands need to know for all cluster nodes
 
 # To Gain the root access on Ubuntu 22.x
 sudo -i
+
+# NOT Mandatory. For better visibility.
+# Add below lines to ~/.bashrc
+# Master Node:
+PS1="\e[0;33m[\u@\h \W]\$ \e[m "
+
+# Worker Node:
+PS1="\e[0;36m[\u@\h \W]\$ \e[m "
 
 # To update and upgarde Ubuntu 22.x Packages before k8s cluster installation
 sudo apt update && sudo apt upgrade -y
