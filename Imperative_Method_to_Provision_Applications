@@ -2,15 +2,25 @@
 # Version 0.1 -10102023
 # Imperative method to create different applications
 
-Setting the namespace preference:
-------------------------------------
+# Reference:
+# https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands
+# https://kubernetes.io/docs/reference/kubectl/conventions/
 
-Note: 
------
-1. You can permanently save the namespace for all subsequent kubectl commands in that context.
-2. --minify=false: Remove all information not used by current-context from the output
+# Location of Static File Manifests File
+/etc/kubernetes/manifests/
+# Location of the Kubelet config File
+/var/lib/kubelet/config.yaml
 
-Syntax: 
+# How to set alias for kubectl
+alias k=kubectl
+
+# Setting the namespace preference:
+
+# Note: 
+# 1. You can permanently save the namespace for all subsequent kubectl commands in that context.
+# 2. --minify=false: Remove all information not used by current-context from the output
+
+# Syntax: 
 kubectl config set-context --current --namespace=<insert-namespace-name-here>
 # Provided alias k=kubectl is set else type full syntax as kubectl
 k config set-context --current --namespace=dev
@@ -58,7 +68,7 @@ k delete ns dev
 k get ns
 k get po
 
-###########################################################################
+# New Section
 
 # Imperative method to provision nginx application
 # Provided namespace is still dev
@@ -97,169 +107,87 @@ k get ns
 k delete ns dev
 k get ns
 k get po
-###############################################################################
+# New Section
 
-Imperative commands
+# Certification Tips – Imperative Commands with Kubectl
+# While you would be working mostly the declarative way – using definition files, imperative commands can help in getting one time tasks done quickly, as well as generate a definition template easily. This would help save considerable amount of time during your exams.
+
+# Before we begin, familiarize with the two options that can come in handy while working with the below commands:
+
+# --dry-run: By default as soon as the command is run, the resource will be created. If you simply want to test your command , use the --dry-run=client option. This will not create the resource, instead, tell you whether the resource can be created and if your command is right.
+
+# -o yaml: This will output the resource definition in YAML format on screen.
+
+# Use the above two in combination to generate a resource definition file quickly, that you can then modify and create resources as required, instead of creating the files from scratch.
 
 
-Create an NGINX Pod
-
+# POD
+# Create an NGINX Pod
 kubectl run nginx --image=nginx
+# Generate POD Manifest YAML file (-o yaml). Don’t create it(–dry-run)
+kubectl run nginx --image=nginx --dry-run=client -o yaml 
 
-Generate POD Manifest YAML file (-o yaml). Don’t create it(–dry-run)
-
-kubectl run nginx --image=nginx --dry-run=client -o yaml
-
-Create a deployment
-
+# Deployment
+# Create a deployment
 kubectl create deployment --image=nginx nginx
-
-Generate Deployment YAML file (-o yaml). Don’t create it(–dry-run)
-
-kubectl create deployment --image=nginx nginx --dry-run=client -o yaml
-
-Generate Deployment YAML file (-o yaml). Don’t create it(–dry-run) and save it to a file.
-
+# Generate Deployment YAML file (-o yaml). Don’t create it(–dry-run) and export the yaml contents to nginx-deployment.yaml
 kubectl create deployment --image=nginx nginx --dry-run=client -o yaml > nginx-deployment.yaml
-
-Make necessary changes to the file (for example, adding more replicas) and then create the deployment.
-
-kubectl create -f nginx-deployment.yaml
-
-OR
-
-In k8s version 1.19+, we can specify the –replicas option to create a deployment with 4 replicas.
-
-kubectl create deployment --image=nginx nginx --replicas=4 --dry-run=client -o yaml > nginx-deployment.yaml
-
-
-Certification Tips – Imperative Commands with Kubectl
-While you would be working mostly the declarative way – using definition files, imperative commands can help in getting one time tasks done quickly, as well as generate a definition template easily. This would help save considerable amount of time during your exams.
-
-Before we begin, familiarize with the two options that can come in handy while working with the below commands:
-
---dry-run: By default as soon as the command is run, the resource will be created. If you simply want to test your command , use the --dry-run=client option. This will not create the resource, instead, tell you whether the resource can be created and if your command is right.
-
--o yaml: This will output the resource definition in YAML format on screen.
-
- 
-
-Use the above two in combination to generate a resource definition file quickly, that you can then modify and create resources as required, instead of creating the files from scratch.
-
- 
-
-POD
-Create an NGINX Pod
-
-kubectl run nginx --image=nginx
-
- 
-
-Generate POD Manifest YAML file (-o yaml). Don’t create it(–dry-run)
-
-kubectl run nginx --image=nginx --dry-run=client -o yaml
-
- 
-
-Deployment
-Create a deployment
-
-kubectl create deployment --image=nginx nginx
-
- 
-
-Generate Deployment YAML file (-o yaml). Don’t create it(–dry-run)
-
-kubectl create deployment --image=nginx nginx --dry-run=client -o yaml
-
- 
-
-Generate Deployment with 4 Replicas
-
+# Generate Deployment with 4 Replicas
 kubectl create deployment nginx --image=nginx --replicas=4
-
- 
-
-You can also scale a deployment using the kubectl scale command.
-
+# You can also scale a deployment using the kubectl scale command.
 kubectl scale deployment nginx --replicas=4 
-
-Another way to do this is to save the YAML definition to a file and modify
-
+# Another way to do this is to save the YAML definition to a file and modify
 kubectl create deployment nginx --image=nginx --dry-run=client -o yaml > nginx-deployment.yaml
+# You can then update the YAML file with the replicas or any other field before creating the deployment.
 
- 
-
-You can then update the YAML file with the replicas or any other field before creating the deployment.
-
- 
-
-Service
-Create a Service named redis-service of type ClusterIP to expose pod redis on port 6379
-
+# Service
+# Create a Service named redis-service of type ClusterIP to expose pod redis on port 6379
 kubectl expose pod redis --port=6379 --name redis-service --dry-run=client -o yaml
+# (This will automatically use the pod’s labels as selectors)
 
-(This will automatically use the pod’s labels as selectors)
+# Or
 
-Or
-
-kubectl create service clusterip redis --tcp=6379:6379 --dry-run=client -o yaml (This will not use the pods labels as selectors, instead it will assume selectors as app=redis. You cannot pass in selectors as an option. So it does not work very well if your pod has a different label set. So generate the file and modify the selectors before creating the service)
+kubectl create service clusterip redis --tcp=6379:6379 --dry-run=client -o yaml 
+# (This will not use the pods labels as selectors, instead it will assume selectors as app=redis. You cannot pass in selectors as an option. So it does not work very well if your pod has a different label set. So generate the file and modify the selectors before creating the service)
 
  
 
-Create a Service named nginx of type NodePort to expose pod nginx’s port 80 on port 30080 on the nodes:
-
+# Create a Service named nginx of type NodePort to expose pod nginx’s port 80 on port 30080 on the nodes:
 kubectl expose pod nginx --type=NodePort --port=80 --name=nginx-service --dry-run=client -o yaml
 
-(This will automatically use the pod’s labels as selectors, but you cannot specify the node port. You have to generate a definition file and then add the node port in manually before creating the service with the pod.)
+# (This will automatically use the pod’s labels as selectors, but you cannot specify the node port. You have to generate a definition file and then add the node port in manually before creating the service with the pod.)
 
-Or
-
+# Or
 kubectl create service nodeport nginx --tcp=80:80 --node-port=30080 --dry-run=client -o yaml
+# (This will not use the pods labels as selectors)
 
-(This will not use the pods labels as selectors)
+# Both the above commands have their own challenges. While one of it cannot accept a selector the other cannot accept a node port. I would recommend going with the `kubectl expose` command. If you need to specify a node port, generate a definition file using the same command and mIf you can't explain it simply you don't understand it well enoughanually input the nodeport before creating the service.
 
-Both the above commands have their own challenges. While one of it cannot accept a selector the other cannot accept a node port. I would recommend going with the `kubectl expose` command. If you need to specify a node port, generate a definition file using the same command and manually input the nodeport before creating the service.
-
-Reference:
-https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands
-
-https://kubernetes.io/docs/reference/kubectl/conventions/
-
-If you can't explain it simply you don't understand it well enough
-
-kubectl get pods --selector env=dev
-
-kubectl get all --selector env=prod
-
+# Filter the pods by choosing selectors
+# For example your have labels like Environment env=prod,businessunit like bu=finance and tier like tier=frontend
+# Filtering through multiple labels
 kubectl get po --selector env=prod,bu=finance,tier=frontend
-
+# Filtering through singular labels
+kubectl get pods --selector env=dev
+kubectl get all --selector env=prod
+# If you want to see the pods filtering through selecting labels
+kubectl get all --selector env=prod --no-headers
+# If you want to count the pods filtering through selecting labels
 kubectl get pods --selector env=dev --no-headers | wc -l
 
-kubectl get all --selector env=prod --no-headers
-kubectl get all --selector env=prod --no-headers | wc -l
-
-kubectl taint no node01 spray=mortein:NoSchedule
+# When you want to remove the taint from control plane use (-) to remove the taint
 kubectl taint no controlplane node-role.kubernetes.io/control-plane:NoSchedule-
 
-The secret of success is to do the common things uncommonly well.
+kubectl taint no node01 spray=mortein:NoSchedule
 
 kubectl label no node01 color=blue
 
-Regret for the time wasted can become a power of good in the time that remains.
-
-– Arthur Brisbane
-
-I hear and I forget. I see and I remember. I do and I understand.
-
+# To view Daemonsets in all namespaces
 kubectl get ds --all-namespaces
 
-kubectl get all  --all-namespaces
-
+# to examine Daemonset For example
 kubectl describe daemonset kube-flannel-ds --namespace=kube-flannel
 
-# Location of Static File Manifests File
-/etc/kubernetes/manifests/
+# To view all objects in all namespaces
+kubectl get all  --all-namespaces
 
-# Location of the Kubelet config File
-/var/lib/kubelet/config.yaml
