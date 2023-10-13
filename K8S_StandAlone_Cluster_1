@@ -72,7 +72,7 @@ exec bash
 
 # Sample for /etc/hosts on all nodes
 # You must copy all these enteries on all nodes - control planes,HA Proxy Node,Woker Nodes,Any Laptop or Jump Server using to access all these nodes.
-sudo vi /etc/host
+sudo vi /etc/hosts
 
 192.168.100.100 controller1 controller1.13infotech.com
 192.168.100.98 wn01 wn01.13infotech.com
