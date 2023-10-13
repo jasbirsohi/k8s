@@ -1,5 +1,5 @@
 
-# Version 0.1 -10102023
+# Version 0.2 -10102023
 # Imperative method to create different applications
 
 # Reference:
@@ -11,8 +11,26 @@
 # Location of the Kubelet config File
 /var/lib/kubelet/config.yaml
 
+# To see kubectl config view
+kubectl config view
+# If you have multiple clusters and you want to change the context
+kubectl config use-context cluster1
+kubectl config use-context cluster2
+kubectl config use-context cluster3
+
 # How to set alias for kubectl
 alias k=kubectl
+
+# How to check if taint is set on any nodes
+k describe node | grep Taints
+
+# Backup - Resource Configs
+kubectl get all --all-namespaces -o yaml > all-deploy-services.yaml
+
+
+# if you want to drain the node
+k drain controller0 --ignore-daemonsets
+
 
 # Setting the namespace preference:
 
@@ -378,3 +396,47 @@ kubectl delete rs <RS-NAME>
 
 # a. Delete the "nginx-pod"
 # b. Ensure there are no Pods running (in the default namespace).
+
+
+
+# New Section
+# Configmaps
+kubectl get configmaps
+kubectl create configmap  webapp-config-map --from-literal=APP_COLOR=darkblue --from-literal=APP_OTHER=disregard
+
+
+# New Section
+# Secrets
+kubectl get secrets
+kubectl describe secrets dashboard-token
+
+kubectl create secret generic db-secret --from-literal=DB_Host=sql01 --from-literal=DB_User=root --from-literal=DB_Password=password123
+kubectl describe secrets db-secret
+kubectl run webapp-pod --image=kodekloud/simple-webapp-mysql --dry-run=client -o yaml > webapp-pod.yaml
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: webapp-pod
+  name: webapp-pod
+spec:
+  containers:
+  - image: kodekloud/simple-webapp-mysql
+    name: webapp-pod
+    envFrom:
+    - secretRef:
+        name: db-secret
+
+---
+
+Important Update: Kubernetes the Hard Way
+Installing Kubernetes the hard way can help you gain a better understanding of putting together the different components manually.
+
+An optional series on this is available at our youtube channel here:
+
+https://www.youtube.com/watch?v=uUupRagM7m0&list=PL2We04F3Y_41jYdadX55fdJplDvgNGENo
+
+The GIT Repo for this tutorial can be found here: https://github.com/mmumshad/kubernetes-the-hard-way
+
