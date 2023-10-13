@@ -281,3 +281,4 @@ kubectl describe svc nginx-app
 
 # Use following curl command to access nginx based application
 curl http://192.168.100.100:31246 # example only, please replace the static IP of your actual controller or node server
+
