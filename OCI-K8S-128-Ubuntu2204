@@ -1,4 +1,4 @@
-# Version 0.1 -10102023
+# Version 0.2 -10182023
 # This Installation file has the steps to install K8S Cluster 1.28 
 # using UBUNTU OS 22.04 Image on Oracle Cloud Infrastructure
 
@@ -49,11 +49,12 @@ grep -v "DROP" iptables-rules > tmpfile && mv tmpfile iptables-rules-mod
 grep -v "REJECT" iptables-rules-mod > tmpfile && mv tmpfile iptables-rules-mod
 
 # apply the changes
+sudo vi iptables-rules-mod
 sudo iptables-restore < ~/iptables-rules-mod
 
 # confirm that there are no rules
 sudo iptables -L
-
+sudo iptables -L INPUT
 # save the changes
 sudo netfilter-persistent save
 sudo systemctl restart iptables
@@ -134,6 +135,7 @@ exec bash
 sudo vi /etc/hosts
 
 10.6.1.211  controller0 controller0.13infotech.com
+10.6.2.10  ocilb1 ocilb1.13infotech.com
 10.6.1.221 wn01 wn01.13infotech.com
 10.6.1.222 wn02 wn02.13infotech.com
 10.6.1.223 wn02 wn02.13infotech.com
@@ -241,6 +243,9 @@ kubeadm join controller1.13infotech.com:6443 --token ir8qv3.m18ok6a0skorkk71 \
 # Join another node to the Cluster. check your own string. DO NOT copy this whole string to activate your node.
 kubeadm join controller1.13infotech.com:6443 --token ir8qv3.m18ok6a0skorkk71 \
 	--discovery-token-ca-cert-hash sha256:c045fb2a1d34005258bf4d130374613f8f6100d058e32a337eb3e1ec87693c62
+
+# For any reason, if kubeadm joining is failed. use this below command to reset the kubeadm activation steps process
+kubeadm reset
 
 
 # Check the nodes status from master node using kubectl command
