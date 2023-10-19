@@ -1,4 +1,4 @@
-# version 0.1 - 10102023
+# version 0.3 - 10192023
 
 # This Installation file has the steps to install K8S Cluster 1.28 on UBUNTU OS 22.04
 
@@ -182,6 +182,10 @@ kubeadm join controller1.13infotech.com:6443 --token ir8qv3.m18ok6a0skorkk71 \
 # Join another node to the Cluster. check your own string. DO NOT copy this whole string to activate your node.
 kubeadm join controller1.13infotech.com:6443 --token ir8qv3.m18ok6a0skorkk71 \
 	--discovery-token-ca-cert-hash sha256:c045fb2a1d34005258bf4d130374613f8f6100d058e32a337eb3e1ec87693c62
+
+
+# For any reason, if kubeadm joining is failed. use this below command to reset the kubeadm activation steps process
+kubeadm reset
 
 
 # Check the nodes status from master node using kubectl command
