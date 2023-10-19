@@ -1,5 +1,5 @@
 
-# Version 0.2 -10102023
+# Version 0.3 -10192023
 # Imperative method to create different applications
 
 # Reference:
@@ -17,6 +17,9 @@ kubectl config view
 kubectl config use-context cluster1
 kubectl config use-context cluster2
 kubectl config use-context cluster3
+
+# to Get the Health Status of Control Plane Compponents
+kubectl get componentstatuses
 
 # How to set alias for kubectl
 alias k=kubectl
