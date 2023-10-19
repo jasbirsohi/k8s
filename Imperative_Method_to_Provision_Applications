@@ -72,6 +72,16 @@ k get po -n=dev -o yaml
 k expose deploy httpd1 --type=NodePort --port=80 -n=dev
 
 
+# When you want to check clusterip connectivity within POD Network
+# kubectl run temp --image=curlimages/curl -i --rm --restart=Never --curl svc name
+kubectl run temp --image=curlimages/curl -i --rm --restart=Never --curl nginx-app
+
+# To check endpoints
+kubectl get ep
+
+# To check po (pods),svc (service),ep (endpoints) all togther 
+kubectl get po,svc,ep -o wide
+
 # Deleting Imperative Commands
 
 # First delete the svc 
@@ -128,6 +138,7 @@ k get ns
 k delete ns dev
 k get ns
 k get po
+
 # New Section
 
 # Certification Tips – Imperative Commands with Kubectl
