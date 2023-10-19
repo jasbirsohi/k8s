@@ -1,4 +1,4 @@
-# Version 0.2 -10182023
+# Version 0.3 -10192023
 # This Installation file has the steps to install K8S Cluster 1.28 
 # using UBUNTU OS 22.04 Image on Oracle Cloud Infrastructure
 
@@ -90,6 +90,9 @@ sudo apt update && sudo apt upgrade -y && sudo apt install vim -y && sudo apt in
 
 # Edit sudo vi /etc/iptables/rules.v4
 
+-A INPUT -p tcp -m state --state NEW -m tcp --dport 80 -j ACCEPT
+-A INPUT -p tcp -m state --state NEW -m tcp --dport 443 -j ACCEPT
+-A INPUT -p tcp -m state --state NEW -m tcp --dport 8443 -j ACCEPT
 -A INPUT -p tcp -m state --state NEW -m tcp --dport 6443 -j ACCEPT
 -A INPUT -p tcp -m state --state NEW -m tcp --dport 2379 -j ACCEPT
 -A INPUT -p tcp -m state --state NEW -m tcp --dport 2380 -j ACCEPT
@@ -98,8 +101,14 @@ sudo apt update && sudo apt upgrade -y && sudo apt install vim -y && sudo apt in
 -A INPUT -p tcp -m state --state NEW -m tcp --dport 10257 -j ACCEPT
 -A INPUT -p tcp -m state --state NEW -m tcp --dport 30000:32767 -j ACCEPT
 
-sudo iptables-restore < /etc/iptables/rules.v4
+# apply the changes
+sudo vi iptables-rules-mod
+sudo iptables-restore < ~/iptables-rules-mod
+
+# confirm that there are no rules
+sudo iptables -L
 sudo iptables -L INPUT
+# save the changes
 sudo netfilter-persistent save
 sudo systemctl restart iptables
 # Restart the node - MUST
@@ -111,10 +120,19 @@ sudo systemctl restart iptables
 # TCP	Inbound	10250	Kubelet API	Self, Control plane
 # TCP	Inbound	30000-32767	NodePort Services†	All
 
+-A INPUT -p tcp -m state --state NEW -m tcp --dport 80 -j ACCEPT
+-A INPUT -p tcp -m state --state NEW -m tcp --dport 443 -j ACCEPT
+-A INPUT -p tcp -m state --state NEW -m tcp --dport 8443 -j ACCEPT
 -A INPUT -p tcp -m state --state NEW -m tcp --dport 10250 -j ACCEPT
 -A INPUT -p tcp -m state --state NEW -m tcp --dport 30000:32767 -j ACCEPT
-sudo iptables-restore < /etc/iptables/rules.v4
+# apply the changes
+sudo vi iptables-rules-mod
+sudo iptables-restore < ~/iptables-rules-mod
+
+# confirm that there are no rules
+sudo iptables -L
 sudo iptables -L INPUT
+# save the changes
 sudo netfilter-persistent save
 sudo systemctl restart iptables
 
@@ -139,6 +157,13 @@ sudo vi /etc/hosts
 10.6.1.221 wn01 wn01.13infotech.com
 10.6.1.222 wn02 wn02.13infotech.com
 10.6.1.223 wn02 wn02.13infotech.com
+
+OR
+
+10.6.0.211  controller1 controller1.13infotech.com
+10.6.2.10  ocilb1 ocilb1.13infotech.com
+10.6.0.221 worker1 worker1.13infotech.com
+
 
 # Mandatory steps to turn off the swap on all nodes
 sudo swapoff -a
