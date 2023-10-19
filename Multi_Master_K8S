@@ -1,7 +1,7 @@
 
-Version 0.2 -10102023
+# Version 0.3 -10192023
 
-Multi-Master K8S Cluster Configuration
+# Multi-Master K8S Cluster Configuration
 
 # VM OS used = Ubuntu 22.04 for all nodes
 # K8S Cluster Version = 1.28.2 (available in Oct 2023)
@@ -110,10 +110,13 @@ backend be-apiserver
        server master1 controller0.13infotech.com:6443 check
        server master2 controller1.13infotech.com:6443 check
        server master3 controller2.13infotech.com:6443 check
+# to check the haproxy configuration errors
+haproxy -c -f /etc/haproxy/haproxy.cfg
+
 # Restart and verify the haproxy
-systemctl restart haproxy
-systemctl status haproxy
-sytemctl enable haproxy
+sudo systemctl restart haproxy
+sudo systemctl status haproxy
+sudo systemctl enable haproxy
 
 # Ensure haproxy is in running status
 # Run nc command as below
@@ -244,6 +247,10 @@ Then you can join any number of worker nodes by running the following on each as
 kubeadm join controller3.13infotech.com:6443 --token xcqu59.994ldqbgjiwpxgv8 \
 	--discovery-token-ca-cert-hash sha256:d2f9fe1b8e2b8fa9eff3090d7a9b9658f283a5446393d8bb72e280eca5cda1ab
     
+
+# For any reason, if kubeadm joining is failed. use this below command to reset the kubeadm activation steps process
+kubeadm reset
+
 
 # Add you newly given kubeadmin join codes like given in example above then you all control planes and worker nodes will join the cluster
 # with Status NOT Ready
